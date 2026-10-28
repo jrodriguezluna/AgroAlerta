@@ -1,57 +1,42 @@
 package com.example.agroalerta.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+/**
+ * Solo tema claro y sin colores dinámicos: la app se usa en terreno con luz solar y el diseño
+ * de Figma es claro, así que la paleta de marca debe verse igual en todos los teléfonos.
+ */
+private val EsquemaClaro = lightColorScheme(
+    primary = VerdePrimario,
     onPrimary = Color.White,
+    primaryContainer = VerdeContenedor,
+    onPrimaryContainer = Color(0xFF0F3D17),
+    secondary = Color(0xFF526350),
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondaryContainer = Color(0xFFDCEFD9),
+    onSecondaryContainer = VerdeTexto,
+    background = FondoApp,
+    onBackground = TextoPrincipal,
+    surface = FondoApp,
+    onSurface = TextoPrincipal,
+    surfaceVariant = Color(0xFFE5F2E2),
+    onSurfaceVariant = Color(0xFF586257),
+    surfaceContainer = FondoNav,
+    outline = BordeCampo,
+    outlineVariant = BordeSuave,
+    error = RojoCritico,
+    onError = Color.White,
+    errorContainer = Color(0xFFFCE3E2),
+    onErrorContainer = Color(0xFFA01F25)
 )
 
 @Composable
-fun AgroAlertaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+fun AgroAlertaTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = EsquemaClaro,
         typography = Typography,
         content = content
     )

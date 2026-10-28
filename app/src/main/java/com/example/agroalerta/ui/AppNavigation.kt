@@ -64,7 +64,9 @@ fun AppNavigation(dao: UsuarioDao) {
             )
         ) { backStackEntry ->
             val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
-            val rol = Rol.valueOf(backStackEntry.arguments?.getString("rol") ?: Rol.TECNICO.name)
+            val rolTexto = backStackEntry.arguments?.getString("rol") ?: ""
+            val rol = Rol.entries.firstOrNull { it.name.equals(rolTexto, ignoreCase = true) }
+                ?: Rol.TECNICO
             MainScreen(
                 nombre = nombre,
                 rol = rol,
