@@ -16,6 +16,7 @@ import com.example.agroalerta.data.local.Rol
 import com.example.agroalerta.data.local.UsuarioDao
 import com.example.agroalerta.ui.login.LoginScreen
 import com.example.agroalerta.ui.main.MainScreen
+import com.example.agroalerta.ui.register.RegisterScreen
 
 object Rutas {
     const val LOGIN = "login"
@@ -49,7 +50,11 @@ fun AppNavigation(dao: UsuarioDao) {
         }
 
         composable(Rutas.REGISTER) {
-
+            RegisterScreen(
+                dao = dao,
+                onRegisterOk = { navController.popBackStack() },
+                onVolver = { navController.popBackStack() }
+            )
         }
 
         composable(
