@@ -29,6 +29,8 @@ fun MainScreen(nombre: String, rol: Rol, onCerrarSesion: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Text("Hola, $nombre (${rol.name})\nPantalla principal pendiente")
+
+            //ToDo: Realizar el Main Screen + Componentes
         }
     }
 
