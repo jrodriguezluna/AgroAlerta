@@ -150,7 +150,7 @@ private fun accionAdicional(grupo: GrupoEquipos, equipo: Equipo): AccionAdiciona
 
 private fun mensajePara(rol: Rol, solicitud: String): String =
     if (rol == Rol.TECNICO) {
-        "Enviar solicitud de $solicitud a un supervisor"
+        "Enviar solicitud de $solicitud a un supervisor. El control remoto no está habilitado (feature en desarrollo)."
     } else {
         "El control remoto no está habilitado (feature en desarrollo)."
     }
