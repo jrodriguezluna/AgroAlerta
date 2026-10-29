@@ -49,7 +49,7 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmar by remember { mutableStateOf("") }
-    var rol by remember { mutableStateOf(Rol.TECNICO) }
+    //var rol by remember { mutableStateOf(Rol.TECNICO) }  || Deprecated
     var error by remember { mutableStateOf<String?>(null) }
 
     val scope = rememberCoroutineScope()
@@ -104,6 +104,7 @@ fun RegisterScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            /* Deprecated
             Text("Rol", style = MaterialTheme.typography.labelLarge)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Rol.entries.forEach { opcion ->
@@ -112,6 +113,7 @@ fun RegisterScreen(
                     Spacer(Modifier.width(16.dp))
                 }
             }
+            */
 
             AnimatedVisibility(visible = error != null) {
                 Text(error ?: "", color = MaterialTheme.colorScheme.error)
@@ -138,7 +140,7 @@ fun RegisterScreen(
                                         nombre = nombre.trim(),
                                         email = emailLimpio,
                                         password = hashPassword(password),
-                                        rol = rol.name
+                                        rol = Rol.TECNICO.name // Por defecto será tecnico
                                     )
                                 )
                                 launch { snackbarHostState.showSnackbar("Cuenta creada. Ya puedes iniciar sesión.") }
