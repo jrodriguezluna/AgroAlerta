@@ -43,4 +43,4 @@ Para entrar como Técnico, registrar una cuenta nueva desde la pantalla de regis
 ## Integrantes
 
 - Brandom Hormazábal
-- Jefferson Luna
+- Jefferson Rodriguez
