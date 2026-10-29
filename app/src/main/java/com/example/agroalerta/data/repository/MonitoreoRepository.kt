@@ -1,6 +1,7 @@
 package com.example.agroalerta.data.repository
 
 import com.example.agroalerta.data.model.AccionSugerida
+import com.example.agroalerta.data.model.Actuador
 import com.example.agroalerta.data.model.Alerta
 import com.example.agroalerta.data.model.Cuartel
 import com.example.agroalerta.data.model.Equipo
@@ -13,6 +14,7 @@ import com.example.agroalerta.data.model.Severidad
 import com.example.agroalerta.data.model.Sistema
 import com.example.agroalerta.data.model.Tendencia
 import com.example.agroalerta.data.model.TipoAlerta
+import com.example.agroalerta.data.model.TipoActuador
 import com.example.agroalerta.data.model.TipoSensor
 import com.example.agroalerta.data.model.TipoSistema
 
@@ -41,6 +43,11 @@ class MonitoreoRepositoryFalso : MonitoreoRepository {
                 Sensor(TipoSensor.HUMEDAD_RELATIVA, "Humedad relativa", "61", "%", EstadoSensor.NORMAL, "40–80 %", Tendencia.ESTABLE, listOf(60f, 61f, 61f, 62f, 61f, 61f)),
                 Sensor(TipoSensor.RADIACION_SOLAR, "Radiación solar", "640", "W/m²", EstadoSensor.NORMAL, "máx. 900 W/m²", Tendencia.SUBE, listOf(420f, 480f, 540f, 590f, 620f, 640f)),
                 Sensor(TipoSensor.CAUDAL, "Caudal", "16", "L/min", EstadoSensor.NORMAL, "mín. 10 L/min", Tendencia.ESTABLE, listOf(16f, 16f, 15f, 16f, 16f, 16f))
+            ),
+            actuadores = listOf(
+                Actuador("Electroválvula principal", TipoActuador.ELECTROVALVULA, EstadoEquipo.ENCENDIDO),
+                Actuador("Bomba de riego", TipoActuador.BOMBA, EstadoEquipo.ENCENDIDO),
+                Actuador("Torre anti-heladas", TipoActuador.TORRE_ANTIHELO, EstadoEquipo.APAGADO)
             )
         ),
         Cuartel(
@@ -52,6 +59,10 @@ class MonitoreoRepositoryFalso : MonitoreoRepository {
                 Sensor(TipoSensor.HUMEDAD_RELATIVA, "Humedad relativa", "64", "%", EstadoSensor.NORMAL, "40–80 %", Tendencia.ESTABLE, listOf(63f, 64f, 64f, 65f, 64f, 64f)),
                 Sensor(TipoSensor.RADIACION_SOLAR, "Radiación solar", "—", "", EstadoSensor.SIN_DATOS, "máx. 900 W/m²", Tendencia.ESTABLE, emptyList()),
                 Sensor(TipoSensor.CAUDAL, "Caudal", "15", "L/min", EstadoSensor.NORMAL, "mín. 10 L/min", Tendencia.ESTABLE, listOf(15f, 15f, 16f, 15f, 15f, 15f))
+            ),
+            actuadores = listOf(
+                Actuador("Electroválvula principal", TipoActuador.ELECTROVALVULA, EstadoEquipo.MANTENCION),
+                Actuador("Bomba de riego", TipoActuador.BOMBA, EstadoEquipo.APAGADO)
             )
         ),
         Cuartel(
@@ -63,6 +74,12 @@ class MonitoreoRepositoryFalso : MonitoreoRepository {
                 Sensor(TipoSensor.HUMEDAD_RELATIVA, "Humedad relativa", "68", "%", EstadoSensor.NORMAL, "40–80 %", Tendencia.SUBE, listOf(60f, 62f, 64f, 65f, 67f, 68f)),
                 Sensor(TipoSensor.RADIACION_SOLAR, "Radiación solar", "—", "", EstadoSensor.SIN_DATOS, "máx. 900 W/m²", Tendencia.ESTABLE, emptyList()),
                 Sensor(TipoSensor.CAUDAL, "Caudal", "14", "L/min", EstadoSensor.PRECAUCION, "mín. 10 L/min", Tendencia.BAJA, listOf(18f, 17f, 16f, 15f, 14f, 14f))
+            ),
+            actuadores = listOf(
+                Actuador("Electroválvula principal", TipoActuador.ELECTROVALVULA, EstadoEquipo.FALLA),
+                Actuador("Válvula auxiliar", TipoActuador.ELECTROVALVULA, EstadoEquipo.ENCENDIDO),
+                Actuador("Bomba de riego", TipoActuador.BOMBA, EstadoEquipo.ENCENDIDO),
+                Actuador("Torre anti-heladas", TipoActuador.TORRE_ANTIHELO, EstadoEquipo.SIN_RESPUESTA)
             )
         ),
         Cuartel(
@@ -74,6 +91,11 @@ class MonitoreoRepositoryFalso : MonitoreoRepository {
                 Sensor(TipoSensor.HUMEDAD_RELATIVA, "Humedad relativa", "82", "%", EstadoSensor.PRECAUCION, "40–80 %", Tendencia.SUBE, listOf(70f, 73f, 76f, 78f, 80f, 82f)),
                 Sensor(TipoSensor.RADIACION_SOLAR, "Radiación solar", "120", "W/m²", EstadoSensor.NORMAL, "máx. 900 W/m²", Tendencia.BAJA, listOf(260f, 220f, 180f, 150f, 130f, 120f)),
                 Sensor(TipoSensor.CAUDAL, "Caudal", "13", "L/min", EstadoSensor.NORMAL, "mín. 10 L/min", Tendencia.ESTABLE, listOf(13f, 13f, 14f, 13f, 13f, 13f))
+            ),
+            actuadores = listOf(
+                Actuador("Electroválvula principal", TipoActuador.ELECTROVALVULA, EstadoEquipo.ENCENDIDO),
+                Actuador("Bomba de riego", TipoActuador.BOMBA, EstadoEquipo.ENCENDIDO),
+                Actuador("Torre anti-heladas", TipoActuador.TORRE_ANTIHELO, EstadoEquipo.MANTENCION)
             )
         )
     )
@@ -89,17 +111,24 @@ class MonitoreoRepositoryFalso : MonitoreoRepository {
         GrupoEquipos(
             "Electroválvulas", listOf(
                 Equipo("Válvula C1", "Cuartel 1", EstadoEquipo.ENCENDIDO),
-                Equipo("Válvula C3", "Cuartel 3", EstadoEquipo.FALLA)
+                Equipo("Válvula C2", "Cuartel 2", EstadoEquipo.ENCENDIDO),
+                Equipo("Válvula C3", "Cuartel 3", EstadoEquipo.FALLA),
+                Equipo("Válvula C4", "Cuartel 4", EstadoEquipo.ENCENDIDO)
             )
         ),
         GrupoEquipos(
             "Bombas de impulsión", listOf(
-                Equipo("Bomba 1", "Estanque principal", EstadoEquipo.ENCENDIDO),
-                Equipo("Bomba 2", "Estanque principal", EstadoEquipo.APAGADO)
+                Equipo("Bomba 1", "Cuartel 1", EstadoEquipo.ENCENDIDO),
+                Equipo("Bomba 2", "Cuartel 2", EstadoEquipo.APAGADO),
+                Equipo("Bomba 3", "Cuartel 3", EstadoEquipo.ENCENDIDO),
+                Equipo("Bomba 4", "Cuartel 4", EstadoEquipo.ENCENDIDO)
             )
         ),
         GrupoEquipos(
             "Sistema anti-heladas", listOf(
+                Equipo("Torre C1", "Cuartel 1", EstadoEquipo.ENCENDIDO),
+                Equipo("Torre C2", "Cuartel 2", EstadoEquipo.ENCENDIDO),
+                Equipo("Torre C3", "Cuartel 3", EstadoEquipo.ENCENDIDO),
                 Equipo("Torre C4", "Cuartel 4", EstadoEquipo.MANTENCION),
                 Equipo("Control remoto", "Estación Sur", EstadoEquipo.SIN_RESPUESTA)
             )

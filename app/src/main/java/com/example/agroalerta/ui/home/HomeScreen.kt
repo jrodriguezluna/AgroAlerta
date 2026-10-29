@@ -1,5 +1,6 @@
 package com.example.agroalerta.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -34,16 +35,21 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.agroalerta.R
 import com.example.agroalerta.data.local.Rol
 import com.example.agroalerta.data.model.Cuartel
 import com.example.agroalerta.data.model.EstadoSensor
 import com.example.agroalerta.data.model.Sistema
+import com.example.agroalerta.data.model.TipoSistema
 import com.example.agroalerta.ui.components.AgroCard
 import com.example.agroalerta.ui.components.AgroTopBar
 import com.example.agroalerta.ui.components.EncabezadoSeccion
@@ -86,6 +92,7 @@ fun HomeScreen(
             TarjetaEstadoGeneral(requiereAtencion = cuarteles.any { it.estado == EstadoSensor.CRITICO })
 
             Spacer(Modifier.height(12.dp))
+            EncabezadoSeccion("Cuarteles", detalle = "Vista general")
             MapaPredio(cuarteles = cuarteles, rol = rol, onAbrirCuartel = onAbrirCuartel)
 
             Spacer(Modifier.height(12.dp))
@@ -188,7 +195,7 @@ private fun TarjetaEstadoGeneral(requiereAtencion: Boolean) {
     }
 }
 
-/** Mapa esquemático del predio: 4 bloques (uno por cuartel) coloreados según su estado. */
+/** Vista general de los cuarteles con fotografías recortadas a un formato uniforme. */
 @Composable
 private fun MapaPredio(cuarteles: List<Cuartel>, rol: Rol, onAbrirCuartel: (Int) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -196,27 +203,62 @@ private fun MapaPredio(cuarteles: List<Cuartel>, rol: Rol, onAbrirCuartel: (Int)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 fila.forEach { cuartel ->
                     val visual = cuartel.estado.visual(rol)
+                    val imagen = when (cuartel.id) {
+                        1 -> R.drawable.cuartel1
+                        2 -> R.drawable.cuartel2
+                        3 -> R.drawable.cuartel3
+                        4 -> R.drawable.cuartel4
+                        else -> null
+                    }
                     Surface(
                         onClick = { onAbrirCuartel(cuartel.id) },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).height(104.dp),
                         shape = RoundedCornerShape(12.dp),
                         color = visual.colores.fondo
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .heightIn(min = 47.dp)
-                                .padding(horizontal = 11.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                cuartel.nombre,
-                                color = visual.colores.texto,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Icon(visual.icono, contentDescription = visual.texto, tint = visual.colores.texto, modifier = Modifier.size(18.dp))
+                        Box {
+                            if (imagen != null) {
+                                Image(
+                                    painter = painterResource(imagen),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.matchParentSize()
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(Color.Transparent, Color.Black.copy(alpha = 0.78f))
+                                            )
+                                        )
+                                )
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    cuartel.nombre,
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        visual.icono,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(visual.texto, color = Color.White, fontSize = 11.sp)
+                                }
+                            }
                         }
                     }
                 }
@@ -267,40 +309,64 @@ private fun ContadorAlertas(cantidad: Int, onClick: () -> Unit) {
 
 @Composable
 private fun TarjetaSistema(sistema: Sistema, rol: Rol, modifier: Modifier = Modifier) {
-    AgroCard(modifier = modifier, shape = RoundedCornerShape(17.dp)) {
-        Column(
-            modifier = Modifier
-                .heightIn(min = 132.dp)
-                .padding(13.dp)
-        ) {
+    val imagen = when (sistema.tipo) {
+        TipoSistema.RIEGO -> R.drawable.aspersor
+        TipoSistema.ANTIHELADAS -> R.drawable.antiheladas
+        TipoSistema.ESTANQUE -> R.drawable.tanque_agua
+        TipoSistema.CLIMA -> R.drawable.clima
+    }
+
+    AgroCard(modifier = modifier, shape = RoundedCornerShape(17.dp), container = Color.Transparent) {
+        Box {
+            Image(
+                painter = painterResource(imagen),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize().blur(6.dp)
+            )
             Box(
                 modifier = Modifier
-                    .size(35.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFE5F2E2)),
-                contentAlignment = Alignment.Center
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.Black.copy(alpha = 0.52f), Color.Black.copy(alpha = 0.68f))
+                        )
+                    )
+            )
+            Column(
+                modifier = Modifier
+                    .heightIn(min = 132.dp)
+                    .padding(13.dp)
             ) {
-                Icon(sistema.tipo.icono(), contentDescription = null, tint = Color(0xFF266E30))
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(sistema.nombre, fontSize = 13.sp, color = Color(0xFF59635A))
-            Spacer(Modifier.height(4.dp))
-
-            // El técnico no ve valores numéricos, solo el estado.
-            if (rol == Rol.SUPERVISOR) {
-                if (sistema.porcentaje != null) {
-                    MedidorEstanque(sistema.porcentaje, "${sistema.valor}${sistema.unidad}")
-                } else {
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(sistema.valor, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1C2A1E))
-                        Text(" ${sistema.unidad}", fontSize = 11.sp, color = Color(0xFF677268), modifier = Modifier.padding(bottom = 3.dp))
-                    }
+                Box(
+                    modifier = Modifier
+                        .size(35.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(sistema.tipo.icono(), contentDescription = null, tint = Color.White)
                 }
                 Spacer(Modifier.height(8.dp))
-            } else {
+                Text(sistema.nombre, fontSize = 13.sp, color = Color.White.copy(alpha = 0.9f))
                 Spacer(Modifier.height(4.dp))
+
+                // El técnico no ve valores numéricos, solo el estado.
+                if (rol == Rol.SUPERVISOR) {
+                    if (sistema.porcentaje != null) {
+                        MedidorEstanque(sistema.porcentaje, "${sistema.valor}${sistema.unidad}")
+                    } else {
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            Text(sistema.valor, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            Text(" ${sistema.unidad}", fontSize = 11.sp, color = Color.White.copy(alpha = 0.9f), modifier = Modifier.padding(bottom = 3.dp))
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                } else {
+                    Spacer(Modifier.height(4.dp))
+                }
+                StatusChip(sistema.estado, rol)
             }
-            StatusChip(sistema.estado, rol)
         }
     }
 }

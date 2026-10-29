@@ -17,7 +17,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.AcUnit
+import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.Error
+import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,14 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agroalerta.data.local.Rol
+import com.example.agroalerta.data.model.Actuador
 import com.example.agroalerta.data.model.Alerta
 import com.example.agroalerta.data.model.Cuartel
+import com.example.agroalerta.data.model.EstadoEquipo
 import com.example.agroalerta.data.model.EstadoSensor
 import com.example.agroalerta.data.model.Sensor
+import com.example.agroalerta.data.model.TipoActuador
+import com.example.agroalerta.data.model.comoEstadoSensor
 import com.example.agroalerta.ui.components.AgroCard
 import com.example.agroalerta.ui.components.AgroTopBar
 import com.example.agroalerta.ui.components.EncabezadoSeccion
@@ -44,6 +55,8 @@ import com.example.agroalerta.ui.components.icono
 import com.example.agroalerta.ui.components.paraRol
 import com.example.agroalerta.ui.components.tituloResumen
 import com.example.agroalerta.ui.components.visual
+import com.example.agroalerta.ui.theme.ColoresAgro
+import com.example.agroalerta.ui.theme.ColoresEstado
 
 @Composable
 fun CuartelDetalleScreen(
@@ -102,6 +115,16 @@ fun CuartelDetalleScreen(
                 cuartel.sensores.forEach { FilaSensor(it, rol) }
             }
 
+            if (cuartel.actuadores.isNotEmpty()) {
+                EncabezadoSeccion(
+                    "Actuadores",
+                    detalle = "${cuartel.actuadores.size} monitoreados"
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    cuartel.actuadores.forEach { FilaActuador(it, rol) }
+                }
+            }
+
             EncabezadoSeccion("Alertas de este cuartel")
             if (alertas.isEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -136,6 +159,49 @@ fun CuartelDetalleScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun FilaActuador(actuador: Actuador, rol: Rol) {
+    val (colores, icono) = aparienciaActuador(actuador)
+    AgroCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+        Row(
+            modifier = Modifier.padding(11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(35.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(colores.fondo),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icono, contentDescription = null, tint = colores.texto)
+            }
+            Text(actuador.nombre, modifier = Modifier.weight(1f), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            StatusChip(
+                estado = actuador.estado.comoEstadoSensor(),
+                rol = rol,
+                etiqueta = if (rol == Rol.SUPERVISOR) actuador.estado.etiqueta else null
+            )
+        }
+    }
+}
+
+private fun aparienciaActuador(actuador: Actuador): Pair<ColoresEstado, ImageVector> {
+    val icono = when (actuador.tipo) {
+        TipoActuador.ELECTROVALVULA -> Icons.Rounded.WaterDrop
+        TipoActuador.BOMBA -> Icons.Rounded.PowerSettingsNew
+        TipoActuador.TORRE_ANTIHELO -> Icons.Rounded.AcUnit
+    }
+    return when (actuador.estado) {
+        EstadoEquipo.ENCENDIDO -> ColoresAgro.normal to icono
+        EstadoEquipo.APAGADO -> ColoresAgro.apagado to icono
+        EstadoEquipo.FALLA -> ColoresAgro.critico to Icons.Rounded.Error
+        EstadoEquipo.MANTENCION -> ColoresAgro.mantencion to Icons.Rounded.Build
+        EstadoEquipo.SIN_RESPUESTA -> ColoresAgro.sinDatos to Icons.Rounded.CloudOff
     }
 }
 

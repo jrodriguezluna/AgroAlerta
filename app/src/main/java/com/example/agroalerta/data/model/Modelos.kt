@@ -41,6 +41,8 @@ enum class TipoSensor { HUMEDAD_SUELO, TEMPERATURA, HUMEDAD_RELATIVA, RADIACION_
 
 enum class TipoSistema { RIEGO, ANTIHELADAS, ESTANQUE, CLIMA }
 
+enum class TipoActuador { ELECTROVALVULA, BOMBA, TORRE_ANTIHELO }
+
 data class Sensor(
     val tipo: TipoSensor,
     val nombre: String,
@@ -59,7 +61,14 @@ data class Cuartel(
     val estado: EstadoSensor,
     /** Texto con el dato relevante (solo lo ve el supervisor). */
     val resumenSupervisor: String? = null,
-    val sensores: List<Sensor>
+    val sensores: List<Sensor>,
+    val actuadores: List<Actuador> = emptyList()
+)
+
+data class Actuador(
+    val nombre: String,
+    val tipo: TipoActuador,
+    val estado: EstadoEquipo
 )
 
 /** Tarjeta de la vista general del predio (riego, anti-heladas, estanque, clima). */

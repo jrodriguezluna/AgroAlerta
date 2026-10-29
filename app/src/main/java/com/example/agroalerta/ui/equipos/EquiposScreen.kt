@@ -18,10 +18,18 @@ import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.WaterDrop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +59,8 @@ fun EquiposScreen(
     grupos: List<GrupoEquipos>,
     onPerfil: () -> Unit
 ) {
+    var mensajeDialogo by remember { mutableStateOf<String?>(null) }
+
     Column(Modifier.fillMaxSize()) {
         AgroTopBar(titulo = "Equipos", rol = rol, iniciales = iniciales, onPerfil = onPerfil)
 
@@ -60,11 +70,11 @@ fun EquiposScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp)
         ) {
-            // El MVP solo monitorea: no hay switches para encender/apagar.
+            // Las acciones siguen siendo simuladas hasta que haya control remoto disponible.
             CajaInformativa(
                 icono = Icons.Rounded.Visibility,
                 titulo = "Monitoreo en modo lectura",
-                detalle = "El control remoto no está habilitado."
+                detalle = "El control remoto no está habilitado ."
             )
 
             grupos.forEach { grupo ->
@@ -73,17 +83,85 @@ fun EquiposScreen(
                     Column {
                         grupo.equipos.forEachIndexed { indice, equipo ->
                             if (indice > 0) HorizontalDivider(color = BordeSuave)
-                            FilaEquipo(equipo, rol)
+                            FilaEquipo(
+                                equipo = equipo,
+                                rol = rol,
+                                accionAdicional = accionAdicional(grupo, equipo),
+                                onAccion = { solicitud ->
+                                    mensajeDialogo = mensajePara(rol, solicitud)
+                                }
+                            )
                         }
                     }
                 }
+
             }
         }
     }
+
+    mensajeDialogo?.let { mensaje ->
+        AlertDialog(
+            onDismissRequest = { mensajeDialogo = null },
+            title = { Text("Confirmar acción") },
+            text = { Text(mensaje) },
+            confirmButton = {
+                TextButton(onClick = { mensajeDialogo = null }) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mensajeDialogo = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
 
+private data class AccionAdicional(
+    val solicitud: String,
+    val descripcion: String,
+    val icono: ImageVector
+)
+
+private fun accionAdicional(grupo: GrupoEquipos, equipo: Equipo): AccionAdicional? =
+    when (grupo.titulo) {
+        "Electroválvulas" -> AccionAdicional(
+            solicitud = "calibración de válvula",
+            descripcion = "Calibrar válvula",
+            icono = Icons.Rounded.Build
+        )
+        "Bombas de impulsión" -> AccionAdicional(
+            solicitud = "cebado de bomba",
+            descripcion = "Cebar bomba",
+            icono = Icons.Rounded.WaterDrop
+        )
+        "Sistema anti-heladas" -> if (equipo.nombre.startsWith("Torre")) {
+            AccionAdicional(
+                solicitud = "prueba de torre",
+                descripcion = "Probar torre anti-heladas",
+                icono = Icons.Rounded.Build
+            )
+        } else {
+            null
+        }
+        else -> null
+    }
+
+private fun mensajePara(rol: Rol, solicitud: String): String =
+    if (rol == Rol.TECNICO) {
+        "Enviar solicitud de $solicitud a un supervisor"
+    } else {
+        "El control remoto no está habilitado (feature en desarrollo)."
+    }
+
 @Composable
-private fun FilaEquipo(equipo: Equipo, rol: Rol) {
+private fun FilaEquipo(
+    equipo: Equipo,
+    rol: Rol,
+    accionAdicional: AccionAdicional?,
+    onAccion: (String) -> Unit
+) {
     val (colores, icono) = apariencia(equipo.estado)
     Row(
         modifier = Modifier
@@ -99,7 +177,21 @@ private fun FilaEquipo(equipo: Equipo, rol: Rol) {
                 .background(colores.fondo),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icono, contentDescription = equipo.estado.etiqueta, tint = colores.texto)
+            if (equipo.estado == EstadoEquipo.ENCENDIDO || equipo.estado == EstadoEquipo.APAGADO) {
+                val operacion = if (equipo.estado == EstadoEquipo.ENCENDIDO) "apagado" else "encendido"
+                IconButton(
+                    onClick = { onAccion(operacion) },
+                    modifier = Modifier.size(35.dp)
+                ) {
+                    Icon(
+                        icono,
+                        contentDescription = "Solicitar $operacion de ${equipo.nombre}",
+                        tint = colores.texto
+                    )
+                }
+            } else {
+                Icon(icono, contentDescription = equipo.estado.etiqueta, tint = colores.texto)
+            }
         }
         Column(Modifier.weight(1f)) {
             Text(equipo.nombre, fontSize = 13.sp, fontWeight = FontWeight.Bold)
@@ -109,12 +201,27 @@ private fun FilaEquipo(equipo: Equipo, rol: Rol) {
                 color = Color(0xFF6C756D)
             )
         }
-        StatusChip(
-            estado = equipo.estado.comoEstadoSensor(),
-            rol = rol,
-            // El supervisor ve el estado real del equipo (Encendido, Apagado...); el técnico, solo bien/revisar.
-            etiqueta = if (rol == Rol.SUPERVISOR) equipo.estado.etiqueta else null
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            StatusChip(
+                estado = equipo.estado.comoEstadoSensor(),
+                rol = rol,
+                // El supervisor ve el estado real del equipo (Encendido, Apagado...); el técnico, solo bien/revisar.
+                etiqueta = if (rol == Rol.SUPERVISOR) equipo.estado.etiqueta else null
+            )
+            if (accionAdicional != null) {
+                IconButton(
+                    onClick = { onAccion(accionAdicional.solicitud) },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        accionAdicional.icono,
+                        contentDescription = "${accionAdicional.descripcion}: ${equipo.nombre}",
+                        tint = Color(0xFF526350),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
