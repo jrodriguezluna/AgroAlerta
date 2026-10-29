@@ -1,6 +1,6 @@
 # AgroAlerta
 
-App Android para el ramo Desarrollo de Aplicaciones Móviles (DSY1105). Permite ver el estado de un predio agrícola y sus alertas desde el celular. Los datos de monitoreo son ficticios.
+App Android para el ramo Desarrollo de Aplicaciones Móviles. Permite ver el estado de un predio agrícola y sus alertas desde el celular. Los datos de monitoreo son ficticios.
 
 ## Pantallas
 
